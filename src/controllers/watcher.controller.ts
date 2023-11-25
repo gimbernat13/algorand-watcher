@@ -5,6 +5,8 @@ dotenv.config();
 
 const SECRET_JWT_KEY = process.env.SECRET_JWT_KEY;
 
+var accounts = [];
+
 export const addAccount = async (req: Request, res: Response) => {
   try {
   } catch (error) {}

@@ -3,7 +3,7 @@ import * as userController from "../controllers/watcher.controller";
 
 const router = express.Router();
 
-router.post("/account-watcher", userController.addAccount);
-router.post("/account-watcher", userController.removeAccount);
+router.post("/account-watcher/add", userController.addAccount);
+router.delete("/account-watcher/remove", userController.removeAccount);
 
 export default router;
