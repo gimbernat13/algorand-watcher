@@ -7,6 +7,11 @@ dotenv.config();
 const accounts: string[] = [
   "ZW3ISEHZUHPO7OZGMKLKIIMKVICOUDRCERI454I3DB2BH52HGLSO67W754",
 ];
+// interface AccountBalances {
+//   [key: string]: number | null;
+// }
+
+// const accountBalances: AccountBalances = {};
 
 export async function fetchAccountData(address: string) {
   console.log("fetching acc data ");
@@ -17,7 +22,7 @@ export async function fetchAccountData(address: string) {
     return response.data;
   } catch (error) {
     console.error("Error fetching data:", error);
-    return null; // or handle the error as you see fit
+    return null;
   }
 }
 
