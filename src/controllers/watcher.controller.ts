@@ -19,6 +19,7 @@ async function checkAccountStates() {
     try {
       const accountData = await fetchAccountData(account);
       const currentBalance = accountData ? accountData.amount : null;
+      accountBalances[account] = currentBalance;
 
       if (
         accountBalances[account] !== undefined &&
@@ -28,7 +29,6 @@ async function checkAccountStates() {
           `Balance changed for account ${account}. Previous: ${accountBalances[account]}, Current: ${currentBalance}`
         );
       }
-      accountBalances[account] = currentBalance;
     } catch (error) {
       console.error(`Error fetching data for account ${account}:`, error);
     }
@@ -38,12 +38,11 @@ async function checkAccountStates() {
 setInterval(checkAccountStates, 6000);
 
 export async function fetchAccountData(address: string) {
-  console.log("Accounts ", accounts);
+  console.log("Accounts State ", accountBalances);
   console.log("🚧 Fetching: ", address);
   try {
     const url = `https://mainnet-api.algonode.cloud/v2/accounts/${address}`;
     const response = await axios.get(url);
-    console.log(response.data);
     return response.data.amount;
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -65,7 +64,6 @@ export const addAccount = async (req: Request, res: Response) => {
 export const removeAccount = async (req: Request, res: Response) => {
   const address = req.params.address;
   accounts.indexOf(address);
-
   try {
     res.status(200).send(`Account ${address} added to watcher list`);
   } catch (error) {
