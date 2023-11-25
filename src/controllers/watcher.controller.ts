@@ -48,6 +48,10 @@ async function checkAccountStates() {
 
 setInterval(checkAccountStates, 6000);
 
+export const getCurrentAccountState = async (req: Request, res: Response) => {
+  res.json(accountState);
+};
+
 export async function fetchAccountData(address: string) {
   try {
     const url = `https://mainnet-api.algonode.cloud/v2/accounts/${address}`;

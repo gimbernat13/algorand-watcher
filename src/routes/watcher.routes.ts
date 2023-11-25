@@ -1,9 +1,18 @@
 import * as express from "express";
-import * as userController from "../controllers/watcher.controller";
+import * as watcherController from "../controllers/watcher.controller";
+import { validateAccountAddress } from "../middleware/validateAccountAddress";
 
 const router = express.Router();
-
-router.post("/account-watcher/add/:address", userController.addAccount);
-router.delete("/account-watcher/remove/:address", userController.removeAccount);
+router.get("/account-watcher/", watcherController.getCurrentAccountState);
+router.post(
+  "/account-watcher/add/:address",
+  validateAccountAddress,
+  watcherController.addAccount
+);
+router.delete(
+  "/account-watcher/remove/:address",
+  validateAccountAddress,
+  watcherController.removeAccount
+);
 
 export default router;
