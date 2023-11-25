@@ -3,34 +3,38 @@ import * as dotenv from "dotenv";
 import axios from "axios";
 
 dotenv.config();
-
+// TODO: ADD CHECK FOR ADDRESS
 const accounts: string[] = [
   "OM6MRCKILRNNBYSSM3NHOQVRCX4EKF3YMA4EKHIGYWAV553Y57ZO2B7EFM",
   "IVBHJFHZWPXRX2EA7AH7Y4UTTBO2AK73XI65OIXDEAEN7VO2IHWXKOKOVM",
   "KWNBRP4E6X7POFIPCDNX5NZBY2YHW4RRH67RBWRCII5BZVZ5NLTGCBANUU",
   "7O3IVAXXX645ZDKBOJIRXW7ULW4B77KK4B5KGVRIIYR3CTK2U5KRLLXWFQ",
-  "ZW3ISEHZUHPO7OZGMKLKIIMKVICOUDRCERI454I3DB2BH52HGLSO67W754",
+  "SDA6DSYRY6P3JIVRA74YD37EXIBMM5FAYCIGXRSWARON6YMWHJSNU3TLDY",
 ];
 interface accountState {
   [key: string]: number | null;
 }
 
 let accountState: accountState = {};
+let isFirstRun = true;
+
 async function checkAccountStates() {
   console.log("🚧 Checking Account States");
   const updatedAccState = { ...accountState };
   let stateHasChanged = false;
+
   for (const account of accounts) {
     try {
       const accountBalance = await fetchAccountData(account);
       const currentBalance = accountBalance ? accountBalance : null;
       updatedAccState[account] = currentBalance;
+
       if (
         accountState[account] !== undefined &&
         accountState[account] !== currentBalance
       ) {
         stateHasChanged = true;
-        console.table(
+        console.log(
           `${account}. Previous: ${accountState[account]}, Current: ${currentBalance}`
         );
       }
@@ -38,12 +42,11 @@ async function checkAccountStates() {
       console.error(`Error fetching data for account ${account}:`, error);
     }
   }
-  if (stateHasChanged) {
-    console.log("Updating State ", accountState);
+  if (isFirstRun || stateHasChanged) {
     accountState = updatedAccState;
+    isFirstRun = false;
+    console.log("Accounts State Updated", accountState);
   }
-
-  console.log("Accounts State Updated", accountState);
 }
 
 setInterval(checkAccountStates, 6000);
