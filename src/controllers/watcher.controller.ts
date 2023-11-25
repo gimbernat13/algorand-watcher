@@ -14,7 +14,6 @@ const accounts: string[] = [
 interface accountState {
   [key: string]: number | null;
 }
-
 let accountState: accountState = {};
 let isFirstRun = true;
 
@@ -22,13 +21,11 @@ async function checkAccountStates() {
   console.log("🚧 Checking Account States");
   const updatedAccState = { ...accountState };
   let stateHasChanged = false;
-
   for (const account of accounts) {
     try {
       const accountBalance = await fetchAccountData(account);
       const currentBalance = accountBalance ? accountBalance : null;
       updatedAccState[account] = currentBalance;
-
       if (
         accountState[account] !== undefined &&
         accountState[account] !== currentBalance
