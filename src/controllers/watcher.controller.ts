@@ -3,13 +3,17 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const SECRET_JWT_KEY = process.env.SECRET_JWT_KEY;
-
-var accounts = [];
+const accounts: string[] = [];
 
 export const addAccount = async (req: Request, res: Response) => {
+  const address = req.params.address;
   try {
-  } catch (error) {}
+    accounts.push(address);
+    res.status(200).send(`Account ${address} added to watcher list`);
+    console.log("Accounts ", accounts);
+  } catch (error) {
+    console.log("error", error);
+  }
 };
 export const removeAccount = async (req: Request, res: Response) => {
   try {
