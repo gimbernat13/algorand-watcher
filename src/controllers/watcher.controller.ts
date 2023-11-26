@@ -49,6 +49,7 @@ async function checkAccountStates() {
 setInterval(checkAccountStates, 6000);
 
 export const getCurrentAccountState = async (req: Request, res: Response) => {
+  await checkAccountStates()
   res.json(accountState);
 };
 
@@ -76,10 +77,17 @@ export const addAccount = async (req: Request, res: Response) => {
 
 export const removeAccount = async (req: Request, res: Response) => {
   const address = req.params.address;
-  accounts.indexOf(address);
-  try {
-    res.status(200).send(`Account ${address} added to watcher list`);
-  } catch (error) {
-    console.log("error", error);
+  const index = accounts.indexOf(address);
+
+  if (index > -1) {
+    accounts.splice(index, 1);
+    delete accountState[address];
+
+    res.status(200).send(`Account ${address} removed from watcher list`);
+    console.log("Updated Accounts List: ", accounts);
+    console.log("Updated Account States: ", accountState);
+
+  } else {
+    res.status(404).send(`Account ${address} not found`);
   }
 };
