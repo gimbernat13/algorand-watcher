@@ -3,6 +3,9 @@ import { Request, Response } from "express";
 import * as dotenv from "dotenv";
 import axios from "axios";
 import _ from 'lodash';
+import { wss } from "../index"
+import WebSocket from 'ws'; // Import the WebSocket class
+
 
 dotenv.config();
 // TODO: ADD CHECK FOR ADDRESS
@@ -41,24 +44,30 @@ async function checkAccountStates() {
     try {
       const currentAccountData = await fetchAccountData(account);
 
-      // Check for any state change (deep comparison)
+      // Check for any state change 
       if (!_.isEqual(accountState[account], currentAccountData)) {
         stateHasChanged = true;
         console.log(`Overall state changed for account ${account}.`);
-        // Emit WebSocket event or log for overall state change
+        wss.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) { // Correct usage of WebSocket.OPEN
+            client.send(JSON.stringify({
+              type: 'stateChanged',
+              data: { account, newState: currentAccountData }
+            }));
+          }
+        });
       }
       if (!_.isEqual(accountState[account], currentAccountData)) {
-        // Find specific differences
         const diffs = accountState[account] && findDifferences(accountState[account], currentAccountData);
         console.log(`Differences for account ${account}:`, diffs);
-        // Emit WebSocket event or log differences
+        // io.emit('stateDifferences', { account, differences: diffs });
       }
 
       // Specific check for balance change
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
       if (accountState[account] !== undefined && accountState[account] !== null && accountState[account].amount !== currentBalance) {
         console.log(`Balance changed for account ${account}. Previous: ${accountState[account].amount}, Current: ${currentBalance}`);
-        // Emit WebSocket event or log for balance change
+        // io.emit('balanceChanged', { account, previousBalance: accountState[account]?.amount, currentBalance });
       }
 
       updatedAccState[account] = currentAccountData;
