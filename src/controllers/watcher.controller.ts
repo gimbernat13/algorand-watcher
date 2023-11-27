@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import * as dotenv from "dotenv";
-import axios from "axios";
 import _ from 'lodash';
 import { wss } from "../index"
 import WebSocket from 'ws'; // Import the WebSocket class
+import { sendWsMessage } from "../utils/webSocket";
+import { fetchAccountData } from "../utils/fetchData";
 
 
 dotenv.config();
@@ -21,18 +22,6 @@ interface accountsState {
 }
 
 
-function sendWsMessage(type: string, data: any) {
-  const message = JSON.stringify({ type, data });
-
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
-}
-
-
-
 
 let accountsState: accountsState = {};
 
@@ -42,8 +31,9 @@ async function checkaccountsStates() {
   console.log("🚧 Checking Account States");
   const updatedAccState = { ...accountsState };
   for (const account of accounts) {
+    const url = `https://mainnet-api.algonode.cloud/v2/accounts/${account}`;
     try {
-      const currentAccountData = await fetchAccountData(account);
+      const currentAccountData = await fetchAccountData(url);
       // Specific check for balance change
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
       if (accountsState[account] !== undefined && accountsState[account] !== null && accountsState[account].amount !== currentBalance) {

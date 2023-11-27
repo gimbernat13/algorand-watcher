@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export async function fetchAccountData(address: string) {
+export async function fetchData(url: string) {
     try {
-        const url = `https://mainnet-api.algonode.cloud/v2/accounts/${address}`;
+
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
