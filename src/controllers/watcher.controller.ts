@@ -70,16 +70,7 @@ export const getCurrentaccountsState = async (req: Request, res: Response) => {
   res.json(accountsState);
 };
 
-export async function fetchAccountData(address: string) {
-  try {
-    const url = `https://mainnet-api.algonode.cloud/v2/accounts/${address}`;
-    const response = await axios.get(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return null;
-  }
-}
+
 
 export const addAccount = async (req: Request, res: Response) => {
   const address = req.params.address;
