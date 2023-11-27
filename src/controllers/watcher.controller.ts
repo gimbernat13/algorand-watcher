@@ -57,7 +57,7 @@ export async function fetchAccountData(address: string) {
   try {
     const url = `https://mainnet-api.algonode.cloud/v2/accounts/${address}`;
     const response = await axios.get(url);
-    return response.data.amount;
+    return response.data;
   } catch (error) {
     console.error("Error fetching data:", error);
     return null;
@@ -70,6 +70,7 @@ export const addAccount = async (req: Request, res: Response) => {
     accounts.push(address);
     res.status(200).send(`Account ${address} added to watcher list`);
     console.log("Accounts ", accounts);
+  
   } catch (error) {
     console.log("error", error);
   }
@@ -82,10 +83,12 @@ export const removeAccount = async (req: Request, res: Response) => {
   if (index > -1) {
     accounts.splice(index, 1);
     delete accountState[address];
+    await checkAccountStates()
 
     res.status(200).send(`Account ${address} removed from watcher list`);
     console.log("Updated Accounts List: ", accounts);
     console.log("Updated Account States: ", accountState);
+
 
   } else {
     res.status(404).send(`Account ${address} not found`);
