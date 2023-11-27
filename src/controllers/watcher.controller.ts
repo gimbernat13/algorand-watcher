@@ -16,58 +16,39 @@ const accounts: string[] = [
   "7O3IVAXXX645ZDKBOJIRXW7ULW4B77KK4B5KGVRIIYR3CTK2U5KRLLXWFQ",
   "SDA6DSYRY6P3JIVRA74YD37EXIBMM5FAYCIGXRSWARON6YMWHJSNU3TLDY",
 ];
-interface accountState {
+interface accountsState {
   [key: string]: any;
 }
-let accountState: accountState = {};
-let isFirstRun = true;
 
 
-function findDifferences(obj1: Record<string, any>, obj2: Record<string, any>) {
-  const differences: Record<string, { from: any; to: any }> = {};
+function sendWsMessage(type: string, data: any) {
+  const message = JSON.stringify({ type, data });
 
-  Object.keys({ ...obj1, ...obj2 }).forEach(key => {
-    if (!_.isEqual(obj1[key], obj2[key])) {
-      differences[key] = { from: obj1[key], to: obj2[key] };
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
     }
   });
-
-  return differences;
 }
 
-async function checkAccountStates() {
-  console.log("🚧 Checking Account States");
-  const updatedAccState = { ...accountState };
-  let stateHasChanged = false;
 
+
+
+let accountsState: accountsState = {};
+
+
+let isFirstRun = true
+async function checkaccountsStates() {
+  console.log("🚧 Checking Account States");
+  const updatedAccState = { ...accountsState };
   for (const account of accounts) {
     try {
       const currentAccountData = await fetchAccountData(account);
-
-      // Check for any state change 
-      if (!_.isEqual(accountState[account], currentAccountData)) {
-        stateHasChanged = true;
-        console.log(`Overall state changed for account ${account}.`);
-        wss.clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN) { // Correct usage of WebSocket.OPEN
-            client.send(JSON.stringify({
-              type: 'stateChanged',
-              data: { account, newState: currentAccountData }
-            }));
-          }
-        });
-      }
-      if (!_.isEqual(accountState[account], currentAccountData)) {
-        const diffs = accountState[account] && findDifferences(accountState[account], currentAccountData);
-        console.log(`Differences for account ${account}:`, diffs);
-        // io.emit('stateDifferences', { account, differences: diffs });
-      }
-
       // Specific check for balance change
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
-      if (accountState[account] !== undefined && accountState[account] !== null && accountState[account].amount !== currentBalance) {
-        console.log(`Balance changed for account ${account}. Previous: ${accountState[account].amount}, Current: ${currentBalance}`);
-        // io.emit('balanceChanged', { account, previousBalance: accountState[account]?.amount, currentBalance });
+      if (accountsState[account] !== undefined && accountsState[account] !== null && accountsState[account].amount !== currentBalance) {
+        console.log(`Balance changed for account ${account}. Previous: ${accountsState[account].amount}, Current: ${currentBalance}`);
+        sendWsMessage('balanceChange', { account, newState: updatedAccState });
       }
 
       updatedAccState[account] = currentAccountData;
@@ -75,18 +56,18 @@ async function checkAccountStates() {
       console.error(`Error fetching data for account ${account}:`, error);
     }
   }
-
-  if (isFirstRun || stateHasChanged) {
-    accountState = updatedAccState;
+  if (isFirstRun) {
+    accountsState = updatedAccState;
     isFirstRun = false;
     console.log("Accounts State Updated");
+    sendWsMessage('balanceChange', { newState: updatedAccState });
   }
 }
-setInterval(checkAccountStates, 6000);
+setInterval(checkaccountsStates, 6000);
 
-export const getCurrentAccountState = async (req: Request, res: Response) => {
-  await checkAccountStates()
-  res.json(accountState);
+export const getCurrentaccountsState = async (req: Request, res: Response) => {
+  await checkaccountsStates()
+  res.json(accountsState);
 };
 
 export async function fetchAccountData(address: string) {
@@ -118,12 +99,12 @@ export const removeAccount = async (req: Request, res: Response) => {
 
   if (index > -1) {
     accounts.splice(index, 1);
-    delete accountState[address];
-    await checkAccountStates()
+    delete accountsState[address];
+    await checkaccountsStates()
 
     res.status(200).send(`Account ${address} removed from watcher list`);
     console.log("Updated Accounts List: ", accounts);
-    console.log("Updated Account States: ", accountState);
+    console.log("Updated Account States: ", accountsState);
 
 
   } else {

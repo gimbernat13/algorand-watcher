@@ -3,7 +3,7 @@ import * as watcherController from "../controllers/watcher.controller";
 // import { validateAccountAddress } from "../middleware/validateAccountAddress";
 
 const router = express.Router();
-router.get("/account-watcher/", watcherController.getCurrentAccountState);
+router.get("/account-watcher/", watcherController.getCurrentaccountsState);
 router.post(
   "/account-watcher/add/:address",
   watcherController.addAccount
