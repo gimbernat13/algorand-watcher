@@ -24,8 +24,6 @@ function findDifferences(obj1: Record<string, any>, obj2: Record<string, any>) {
   const differences: Record<string, { from: any; to: any }> = {};
 
   Object.keys({ ...obj1, ...obj2 }).forEach(key => {
-    if (key === "round") return; // Skip the "round" key
-
     if (!_.isEqual(obj1[key], obj2[key])) {
       differences[key] = { from: obj1[key], to: obj2[key] };
     }
@@ -43,16 +41,22 @@ async function checkAccountStates() {
     try {
       const currentAccountData = await fetchAccountData(account);
 
+      // Check for any state change (deep comparison)
       if (!_.isEqual(accountState[account], currentAccountData)) {
         stateHasChanged = true;
+        console.log(`Overall state changed for account ${account}.`);
+        // Emit WebSocket event or log for overall state change
+      }
+      if (!_.isEqual(accountState[account], currentAccountData)) {
+        // Find specific differences
         const diffs = accountState[account] && findDifferences(accountState[account], currentAccountData);
         console.log(`Differences for account ${account}:`, diffs);
         // Emit WebSocket event or log differences
       }
 
+      // Specific check for balance change
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
-      if (accountState && accountState[account].amount !== currentBalance) {
-        stateHasChanged = true;
+      if (accountState[account] !== undefined && accountState[account] !== null && accountState[account].amount !== currentBalance) {
         console.log(`Balance changed for account ${account}. Previous: ${accountState[account].amount}, Current: ${currentBalance}`);
         // Emit WebSocket event or log for balance change
       }
@@ -60,7 +64,6 @@ async function checkAccountStates() {
       updatedAccState[account] = currentAccountData;
     } catch (error) {
       console.error(`Error fetching data for account ${account}:`, error);
-      console.log("accounts ", accounts)
     }
   }
 
