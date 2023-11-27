@@ -52,7 +52,6 @@ async function checkAccountStates() {
 
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
       if (accountState && accountState[account].amount !== currentBalance) {
-        stateHasChanged = true;
         console.log(`Balance changed for account ${account}. Previous: ${accountState[account].amount}, Current: ${currentBalance}`);
         // Emit WebSocket event or log for balance change
       }
