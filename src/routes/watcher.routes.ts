@@ -1,7 +1,5 @@
 import * as express from "express";
-import * as watcherController from "../controllers/watcher.controller";
 import { AccountsService } from "../services/acounts.service";
-// import { validateAccountAddress } from "../middleware/validateAccountAddress";
 
 const router = express.Router();
 

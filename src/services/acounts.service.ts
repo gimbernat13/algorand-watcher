@@ -8,7 +8,7 @@ interface accountsState {
 }
 
 export class AccountsService {
-    private accounts: string[] = []; 
+    private accounts: string[] = [];
     private accountsState: accountsState = {};
 
     constructor() {
