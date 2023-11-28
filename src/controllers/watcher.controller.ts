@@ -17,9 +17,6 @@ const accounts: string[] = [
   "7O3IVAXXX645ZDKBOJIRXW7ULW4B77KK4B5KGVRIIYR3CTK2U5KRLLXWFQ",
   "SDA6DSYRY6P3JIVRA74YD37EXIBMM5FAYCIGXRSWARON6YMWHJSNU3TLDY",
 ];
-interface accountsState {
-  [key: string]: any;
-}
 
 
 
@@ -61,7 +58,6 @@ export const getCurrentaccountsState = async (req: Request, res: Response) => {
 };
 
 
-
 export const addAccount = async (req: Request, res: Response) => {
   const address = req.params.address;
   try {
@@ -86,8 +82,6 @@ export const removeAccount = async (req: Request, res: Response) => {
     res.status(200).send(`Account ${address} removed from watcher list`);
     console.log("Updated Accounts List: ", accounts);
     console.log("Updated Account States: ", accountsState);
-
-
   } else {
     res.status(404).send(`Account ${address} not found`);
   }
