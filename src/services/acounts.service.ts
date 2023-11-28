@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { fetchData } from "../utils/fetchData";
+import { sendWsMessage } from "../utils/webSocket";
 
 
 interface accountsState {
@@ -10,18 +11,51 @@ interface accountsState {
 export class AccountsService {
     private accounts: string[] = [];
     private accountsState: accountsState = {};
+    private intervalId: any;
 
+    // Initializes state with existing accounts from file 
     constructor() {
+        const initialAccounts = this.accounts
+        initialAccounts.forEach(account => {
+            this.accountsState[account] = {}; 
+        });
+        this.intervalId = setInterval(() => {
+            this.checkAccountsStates();
+        }, 60000);
     }
-    async checkaccountsStates(): Promise<accountsState> {
+
+    stopCheckingAccounts() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+            console.log("Stopped checking account states.");
+        }
+    }
+
+    async checkAccountsStates() {
         console.log("🚧 Checking Account States");
         const updatedAccState = { ...this.accountsState };
-        const accountDataPromises = this.accounts.map(account => fetchData(account));
-        const accountsData = await Promise.all(accountDataPromises);
-        console.log("accounts data", accountsData)
+        try {
+            const accountDataPromises = this.accounts.map(account =>
+                fetchData(`https://mainnet-api.algonode.cloud/v2/accounts/${account}`)
+            );
+            const accountsData = await Promise.all(accountDataPromises);
+            accountsData.forEach((currentAccountData, index) => {
+                const account = this.accounts[index];
+                const currentBalance = currentAccountData ? currentAccountData.amount : null;
+                if (updatedAccState[account] && updatedAccState[account].amount !== currentBalance) {
+                    console.log(`Balance changed for account ${account}. Previous: ${updatedAccState[account].amount}, Current: ${currentBalance}`);
+                    sendWsMessage('balanceChange', { account, newState: updatedAccState });
+                }
+                updatedAccState[account] = currentAccountData;
+            });
+            this.accountsState = updatedAccState;
+            console.log("Accounts State Updated");
+        } catch (error) {
+            console.error("Error while fetching account data:", error);
+        }
 
-
-        return updatedAccState;
+        return this.accountsState;
     }
 
     addAccount(address: string): void {
@@ -41,7 +75,7 @@ export class AccountsService {
     }
 
     getCurrentaccountsState = async () => {
-        const res = await this.checkaccountsStates()
+        const res = await this.checkAccountsStates()
         return res
     };
 

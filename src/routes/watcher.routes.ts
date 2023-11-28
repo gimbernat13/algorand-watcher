@@ -7,10 +7,10 @@ const router = express.Router();
 const accountsService = new AccountsService();
 router.get('/account-watcher/', async (req, res) => {
   try {
-    const response = await accountsService.checkaccountsStates()
+    const response = await accountsService.checkAccountsStates()
     res.status(200).json({ success: true, response });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error });
   }
 });
 
@@ -20,7 +20,7 @@ router.post('/account-watcher/add/:address', async (req, res) => {
     accountsService.addAccount(address);
     res.status(200).json({ success: true, message: `Account ${address} added` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error });
   }
 });
 
@@ -31,7 +31,7 @@ router.delete('/account-watcher/remove/:address', async (req, res) => {
     accountsService.removeAccount(address);
     res.status(200).json({ success: true, message: `Account ${address} removed` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error });
   }
 });
 
