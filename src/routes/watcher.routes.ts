@@ -8,7 +8,8 @@ const accountsService = new AccountsService();
 router.get('/account-watcher/', async (req, res) => {
   try {
     const response = await accountsService.checkAccountsStates()
-    res.status(200).json({ success: true, response });
+    console.log("response " ,response)
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ success: false, error: error });
   }
