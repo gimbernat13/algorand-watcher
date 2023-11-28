@@ -28,7 +28,7 @@ export class AccountsService {
         });
         this.intervalId = setInterval(() => {
             this.checkAccountsStates();
-        }, 6000);
+        }, 30000);
     }
 
     stopCheckingAccounts() {
