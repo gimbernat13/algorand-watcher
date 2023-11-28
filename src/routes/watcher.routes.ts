@@ -2,9 +2,9 @@ import * as express from "express";
 import { AccountsService } from "../services/acounts.service";
 
 const router = express.Router();
-
-
 const accountsService = new AccountsService();
+
+
 router.get('/account-watcher/', async (req, res) => {
   try {
     const response = await accountsService.checkAccountsStates()
