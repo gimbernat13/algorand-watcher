@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { wss } from "../index"
 import WebSocket from 'ws'; // Import the WebSocket class
 import { sendWsMessage } from "../utils/webSocket";
-import { fetchAccountData } from "../utils/fetchData";
+import { fetchData } from "../utils/fetchData";
 
 
 dotenv.config();
@@ -33,7 +33,7 @@ async function checkaccountsStates() {
   for (const account of accounts) {
     const url = `https://mainnet-api.algonode.cloud/v2/accounts/${account}`;
     try {
-      const currentAccountData = await fetchAccountData(url);
+      const currentAccountData = await fetchData(url);
       // Specific check for balance change
       const currentBalance = currentAccountData ? currentAccountData.amount : null;
       if (accountsState[account] !== undefined && accountsState[account] !== null && accountsState[account].amount !== currentBalance) {
